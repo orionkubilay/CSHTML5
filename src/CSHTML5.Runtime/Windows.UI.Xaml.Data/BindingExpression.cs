@@ -169,6 +169,13 @@ namespace Windows.UI.Xaml.Data
                     if (typeMetadata != null)
                     {
                         value = typeMetadata.DefaultValue; // This is useful for example to prevent "e.NewValue" in "Visibility_PropertyChanged" from being equal to "null" rather than "Visible" when changing the DataContext to null while Visibility was bound to a property of the DataContext. For details, see "AccountManagerApp" and see the commits of CSHTML5 around the date 2015.05.23.
+                        if (property == Setter.ValueProperty)
+                        {
+                            if (ParentBinding.Converter != null)
+                            {
+                                value = ParentBinding.Converter.Convert(value, property.PropertyType, ParentBinding.ConverterParameter, ParentBinding.ConverterCulture);
+                            }
+                        }
                     }
                 }
 

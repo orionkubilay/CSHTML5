@@ -50,7 +50,7 @@ namespace DotNetForHtml5.Core // Important: DO NOT RENAME. This namespace is cal
         {
             // Register converters for base system types:
             RegisterConverter(typeof(bool), ConvertBoolFromString);
-            RegisterConverter(typeof(Nullable<bool>), ConvertBoolFromString);
+            RegisterConverter(typeof(Nullable<bool>), ConvertNullableBoolFromString);
             RegisterConverter(typeof(int), ConvertIntFromString);
             RegisterConverter(typeof(double), ConvertDoubleFromString);
             RegisterConverter(typeof(Uri), ConvertUriFromString);
@@ -133,11 +133,11 @@ namespace DotNetForHtml5.Core // Important: DO NOT RENAME. This namespace is cal
                 {
 #if WORKINPROGRESS
                     Debug.WriteLine("Unable to find a converter from \"String\" to \"" + type.ToString() + "\"");
-                    if(type.IsValueType)
+                    if (type.IsValueType)
                     {
                         return Activator.CreateInstance(type);
                     }
-                    else 
+                    else
                     {
                         return null;
                     }
@@ -160,23 +160,31 @@ namespace DotNetForHtml5.Core // Important: DO NOT RENAME. This namespace is cal
             Type nonNullableType = type;
             if (type.Name == "Nullable`1")
             {
-                //BRIDGETODO
-                //verify the conditons matchs below with or without bridge
+                if (Converters.ContainsKey(type))
+                {
+                    converter = Converters[type];
+                    return true;
+                }
+                else
+                {
+                    //BRIDGETODO
+                    //verify the conditons matchs below with or without bridge
 #if !BRIDGE
-                if (type.IsGenericType && type.GenericTypeArguments.Length > 0)
+                    if (type.IsGenericType && type.GenericTypeArguments.Length > 0)
 #else
-                if (type.IsGenericType && type.GetGenericArguments().Length > 0)
+                    if (type.IsGenericType && type.GetGenericArguments().Length > 0)
 
 #endif
-                {
+                    {
 #if !BRIDGE
-                    nonNullableType = type.GenericTypeArguments[0];
+                        nonNullableType = type.GenericTypeArguments[0];
 #else
-                    nonNullableType = type.GetGenericArguments()[0];
+                        nonNullableType = type.GetGenericArguments()[0];
 #endif
+                    }
                 }
             }
-
+            IEnumerable<string> x = null;
             if (Converters.ContainsKey(nonNullableType))
             {
                 converter = Converters[nonNullableType];
@@ -202,7 +210,27 @@ namespace DotNetForHtml5.Core // Important: DO NOT RENAME. This namespace is cal
             {
                 return false;
             }
-            throw new Exception("Xaml exception: cannot convert \"" + str + "\" to bool. " + AdviseToFixTheError);
+            else
+            {
+                throw new Exception("Xaml exception: cannot convert \"" + str + "\" to bool. " + AdviseToFixTheError);
+            }
+        }
+
+        static object ConvertNullableBoolFromString(string str)
+        {
+            string lowerStr = str.ToLower();
+            if (lowerStr == "true")
+            {
+                return true;
+            }
+            else if (lowerStr == "false")
+            {
+                return false;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         static object ConvertIntFromString(string str)
