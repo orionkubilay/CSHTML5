@@ -315,7 +315,7 @@ namespace CSHTML5.Internal
                     //get the list of setters of the currently applied style on the element and of the default style:
                     Dictionary<DependencyProperty, Setter> normalStyleDictionary = null;
                     bool childHasStyle = childAsFrameworkElement.Style != null;
-                    if(childHasStyle)
+                    if (childHasStyle)
                     {
                         normalStyleDictionary = childAsFrameworkElement.Style.GetDictionaryOfSettersFromStyle();
                     }
@@ -330,7 +330,7 @@ namespace CSHTML5.Internal
 #endif
                         )
                     {
-                        if(!childHasStyle || !normalStyleDictionary.ContainsKey(prop))
+                        if (!childHasStyle || !normalStyleDictionary.ContainsKey(prop))
                         {
                             Setter setter = defaultStyleDictionary[prop];
 
@@ -523,12 +523,7 @@ namespace CSHTML5.Internal
                 INTERNAL_HtmlDomManager.GetDomElementStyleForModification(outerDomElement).position = "absolute"; //todo: test if this works properly
             }
 
-            // If the current element is inside a Grid, we need to explicitly set its CSS property "PointerEvents=auto" because its parent child wrapper has "PointerEvents=none" in order to prevent its child wrappers from overlapping each other and thus preventing clicks on some children.
-            if (parent is Grid && child is FrameworkElement) //todo: generalize this code so that we have no hard-reference on the Grid control, and third-party controls can use the same mechanics.
-            {
-                var frameworkElement = ((FrameworkElement)child);
-                FrameworkElement.INTERNAL_UpdateCssPointerEventsPropertyBasedOnIsHitTestVisibleAndIsEnabled(frameworkElement, frameworkElement.IsHitTestVisible, frameworkElement.IsEnabled);
-            }
+            UIElement.INTERNAL_UpdateCssPointerEvents(child);
 
             // Reset the flag that tells if we have already applied the RenderTransformOrigin (this is useful to ensure that the default RenderTransformOrigin is (0,0) like in normal XAML, instead of (0.5,0.5) like in CSS):
             child.INTERNAL_RenderTransformOriginHasBeenApplied = false;
@@ -670,7 +665,7 @@ namespace CSHTML5.Internal
             Performance.Counter("VisualTreeManager: Raise Loaded event", t11);
 #endif
 
-#region PREVIOUS VERSION
+            #region PREVIOUS VERSION
             //// Prepare the parent DOM structure so that it is ready to contain the child (for example, in case of a grid, we need to (re)create the rows and columns where to place the elements):
             //parent.INTERNAL_UpdateDomStructureIfNecessary();
             //dynamic domElementWhereToPlaceChildStuff = (parent.GetDomElementWhereToPlaceChild(child) ?? parent.INTERNAL_InnerDomElement);
@@ -784,7 +779,7 @@ namespace CSHTML5.Internal
             //// Call the "Loaded" event: (note: in XAML, the "loaded" event of the children is called before the loaded" event of the parent)
             //if (child is FrameworkElement)
             //    ((FrameworkElement)child).INTERNAL_RaiseLoadedEvent();
-#endregion
+            #endregion
         }
 
         public static bool IsElementInVisualTree(UIElement child)

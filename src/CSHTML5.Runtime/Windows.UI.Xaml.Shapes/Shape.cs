@@ -62,6 +62,11 @@ namespace Windows.UI.Xaml.Shapes
         //    Shape.WidthProperty.OverrideMetadata(typeof(Shape), propertyMetadata);
         //}
 
+        internal override bool INTERNAL_ManageFrameworkElementPointerEventsAvailability()
+        {
+            return Fill != null;
+        }
+
 
         /// <summary>
         /// Provides base class initialization behavior for Shape derived classes.
@@ -114,6 +119,7 @@ namespace Windows.UI.Xaml.Shapes
         static void Fill_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var shape = (Shape)d;
+            INTERNAL_UpdateCssPointerEvents(shape);
             shape.ScheduleRedraw();
         }
 
