@@ -61,6 +61,10 @@ namespace Windows.UI.Xaml.Controls
         /// </summary>
         protected bool DisableBaseControlHandlingOfVisualStates = false;
 
+        internal override bool INTERNAL_ManageFrameworkElementPointerEventsAvailability()
+        {
+            return true;
+        }
 
         //-----------------------
         // ISENABLED (OVERRIDE)
@@ -91,7 +95,7 @@ namespace Windows.UI.Xaml.Controls
         /// Identifies the Background dependency property.
         /// </summary>
         public static readonly DependencyProperty BackgroundProperty =
-            DependencyProperty.Register("Background", typeof(Brush), typeof(Control), new PropertyMetadata(null)
+            DependencyProperty.Register("Background", typeof(Brush), typeof(Control), new PropertyMetadata(null, Background_Changed)
             {
                 GetCSSEquivalent = (instance) =>
                     {
@@ -185,6 +189,17 @@ namespace Windows.UI.Xaml.Controls
                     //    }
             }
             );
+
+        internal virtual void ManageBackgroundChange(Brush background)
+        {
+            INTERNAL_UpdateCssPointerEvents(this);
+        }
+
+        private static void Background_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            Control control = (Control)d;
+            control.ManageBackgroundChange(e.NewValue != null ? (Brush)e.NewValue : null);
+        }
 
         //-----------------------
         // BORDERBRUSH

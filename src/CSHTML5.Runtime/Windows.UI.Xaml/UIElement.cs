@@ -413,6 +413,7 @@ namespace Windows.UI.Xaml
 
             if (INTERNAL_VisualTreeManager.IsElementInVisualTree(uiElement))
             {
+                INTERNAL_UpdateCssPointerEvents(uiElement);
                 // Get a reference to the most outer DOM element to show/hide:
                 dynamic mostOuterDomElement = null;
                 if (uiElement.INTERNAL_VisualParent is UIElement)
@@ -569,21 +570,20 @@ namespace Windows.UI.Xaml
         private static void IsHitTestVisible_MethodToUpdateDom(DependencyObject d, object newValue)
         {
             UIElement element = (UIElement)d;
-            INTERNAL_UpdateCssPointerEventsPropertyBasedOnIsHitTestVisibleAndIsEnabled(element,
-                isHitTestVisible: (bool)newValue,
-                isEnabled: element is FrameworkElement ? ((FrameworkElement)element).IsEnabled : true);
+            //INTERNAL_UpdateCssPointerEventsPropertyBasedOnIsHitTestVisibleAndIsEnabled(element,
+            //    isHitTestVisible: (bool)newValue,
+            //    isEnabled: element is FrameworkElement ? ((FrameworkElement)element).IsEnabled : true);
+            INTERNAL_UpdateCssPointerEvents(element);
         }
 
         #endregion
 
-        internal static void INTERNAL_UpdateCssPointerEventsPropertyBasedOnIsHitTestVisibleAndIsEnabled(UIElement element, bool isHitTestVisible, bool isEnabled)
+        internal static void INTERNAL_UpdateCssPointerEvents(UIElement element)
         {
-            //todo: at the moment, the "IsEnabled" property is implemented with the CSS property "PointerEvents=none" (just like "IsHitTestVisible"). However, this is not good because "PointerEvents=none" makes the element transparent to click, meaning that the user's click will go to the element that is under it. Instead, the click event should be "absorbed" and lost (or bubbled up? but not go behind).
-
             if (INTERNAL_VisualTreeManager.IsElementInVisualTree(element))
             {
                 dynamic style = INTERNAL_HtmlDomManager.GetDomElementStyleForModification(element.INTERNAL_OuterDomElement);
-                if (isHitTestVisible && isEnabled)
+                if (element.INTERNAL_ArePointerEventsEnabled)
                 {
                     style.pointerEvents = "auto";
                 }
