@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
+using System.Windows.Media;
 #if !FOR_DESIGN_TIME && !MIGRATION
 using Windows.UI.Xaml.Markup;
 #endif
@@ -44,6 +45,28 @@ namespace Windows.UI.Xaml.Controls
         public UserControl()
         {
             IsTabStop = false; //we want to avoid stopping on this element's div when pressing tab.
+        }
+
+#if MIGRATION
+        // In Silverlight, it appears that UserControl ignore the Background property.
+        internal override void ManageBackgroundChange(Brush background)
+        {
+            if(background != null)
+            {
+                Background = null;
+            }
+        }
+#endif
+        internal override bool INTERNAL_ManageFrameworkElementPointerEventsAvailability()
+        {
+#if MIGRATION
+            // In Silverlight, it appears that UserControl does not support mouse events because its Background property is ignored.
+            return false;
+#else
+            // We only check the Background property even if BorderBrush not null + BorderThickness > 0 is a sufficient condition to enable pointer events on the borders of the control.
+            // There is no way right now to differentiate the Background and BorderBrush as they are both defined on the same DOM element.
+            return Background != null;
+#endif
         }
 
         /// <summary>
@@ -73,7 +96,15 @@ namespace Windows.UI.Xaml.Controls
         //{
         //}
 
-        #region ---------- INameScope implementation ----------
+        //public override object CreateDomElement(object parentRef, out object domElementWhereToPlaceChildren)
+        //{
+        //    var div = base.CreateDomElement(parentRef, out domElementWhereToPlaceChildren);
+        //    var divStyle = INTERNAL_HtmlDomManager.GetDomElementStyleForModification(div);
+        //    divStyle.pointerEvents = "none";
+        //    return div;
+        //}
+
+#region ---------- INameScope implementation ----------
 
         Dictionary<string, object> _nameScopeDictionary = new Dictionary<string,object>();
 
@@ -106,6 +137,6 @@ namespace Windows.UI.Xaml.Controls
             _nameScopeDictionary.Remove(name);
         }
 
-        #endregion
+#endregion
     }
 }

@@ -45,6 +45,13 @@ namespace Windows.UI.Xaml.Controls
     [ContentProperty("Children")]
     public abstract class Panel : FrameworkElement
     {
+        internal override bool INTERNAL_ManageFrameworkElementPointerEventsAvailability()
+        {
+            // We only check the Background property even if BorderBrush not null + BorderThickness > 0 is a sufficient condition to enable pointer events on the borders of the control.
+            // There is no way right now to differentiate the Background and BorderBrush as they are both defined on the same DOM element.
+            return Background != null;
+        }
+
         UIElementCollection _children;
 
         public bool INTERNAL_EnableProgressiveLoading;
@@ -97,7 +104,7 @@ namespace Windows.UI.Xaml.Controls
         /// Identifies the Background dependency property.
         /// </summary>
         public static readonly DependencyProperty BackgroundProperty =
-            DependencyProperty.Register("Background", typeof(Brush), typeof(Panel), new PropertyMetadata(null)
+            DependencyProperty.Register("Background", typeof(Brush), typeof(Panel), new PropertyMetadata(null, Background_Changed)
             {
                 GetCSSEquivalent = (instance) =>
                 {
@@ -108,6 +115,12 @@ namespace Windows.UI.Xaml.Controls
                 }
             }
             );
+
+        private static void Background_Changed(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UIElement element = (UIElement)d;
+            INTERNAL_UpdateCssPointerEvents(element);
+        }
 
         /// <summary>
         /// Gets the collection of child elements of the panel.

@@ -78,6 +78,19 @@ namespace Windows.UI.Xaml
         {
         }
 
+        internal virtual bool INTERNAL_ManageFrameworkElementPointerEventsAvailability()
+        {
+            return false;
+        }
+
+        internal sealed override bool INTERNAL_ManagePointerEventsAvailability()
+        {
+            return INTERNAL_ManageFrameworkElementPointerEventsAvailability()
+                && Visibility == Visibility.Visible
+                && IsEnabled
+                && IsHitTestVisible;
+        }
+
 
         #region Resources
 
@@ -268,9 +281,10 @@ namespace Windows.UI.Xaml
         private static void IsEnabled_MethodToUpdateDom(DependencyObject d, object newValue)
         {
             FrameworkElement element = (FrameworkElement)d;
-            INTERNAL_UpdateCssPointerEventsPropertyBasedOnIsHitTestVisibleAndIsEnabled(element,
-                isHitTestVisible: element.IsHitTestVisible,
-                isEnabled: (bool)newValue);
+            //INTERNAL_UpdateCssPointerEventsPropertyBasedOnIsHitTestVisibleAndIsEnabled(element,
+            //    isHitTestVisible: element.IsHitTestVisible,
+            //    isEnabled: (bool)newValue);
+            INTERNAL_UpdateCssPointerEvents(element);
             element.ManageIsEnabled(newValue != null ? (bool)newValue : true);
         }
 
